@@ -1,0 +1,15 @@
+{
+	"name": "dev-camper-workshop",
+	"version": "1.0.0",
+	"description": "reinforcing & learning nodejs knowledge",
+	"main": "server.js",
+	"scripts": {
+		"start": "node server",
+		"dev": "nodemon server"
+	},
+	"author": "douscriptist",
+	"license": "ISC",
+	"devDependencies": {
+		"nodemon": "^2.0.3"
+	}
+}
