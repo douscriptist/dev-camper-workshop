@@ -4,7 +4,7 @@
 	"description": "reinforcing & learning nodejs knowledge",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server",
+		"start": "NODE_ENV=production node server",
 		"dev": "nodemon server"
 	},
 	"author": "douscriptist",
@@ -13,6 +13,7 @@
 		"nodemon": "^2.0.3"
 	},
 	"dependencies": {
+		"dotenv": "^8.2.0",
 		"express": "^4.17.1"
 	}
 }
