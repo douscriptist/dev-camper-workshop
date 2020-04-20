@@ -1,5 +1,6 @@
 #CUSTOMS
 /source
+/config/config.env
 
 
 # Logs
