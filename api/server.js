@@ -20,6 +20,8 @@ if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
 // @Prod Middlewares
+// Body parser
+app.use(express.json());
 
 // ROUTES
 app.use('/api/v1/bootcamps', require('./routes/bootcamps'));
