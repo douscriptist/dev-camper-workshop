@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 // const logger = require('./middleware/logger');
 const morgan = require('morgan');
 const colors = require('colors');
+const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 
 // Load env file
@@ -25,6 +26,8 @@ app.use(express.json());
 
 // ROUTES
 app.use('/api/v1/bootcamps', require('./routes/bootcamps'));
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 4500;
 

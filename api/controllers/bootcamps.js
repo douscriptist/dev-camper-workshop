@@ -1,3 +1,4 @@
+const ErrorResponse = require('../utils/ErrorResponse');
 const Bootcamp = require('../models/Bootcamp');
 
 // @desc      Get all bootcamps
@@ -13,10 +14,7 @@ exports.getBootcamps = async (req, res, next) => {
 			data: bootcamps,
 		});
 	} catch (err) {
-		res.status(400).json({
-			success: false,
-			msg: err.message,
-		});
+		next(err);
 	}
 };
 
@@ -29,11 +27,9 @@ exports.getBootcamp = async (req, res, next) => {
 
 		// If there is no bootcamp
 		if (!bootcamp) {
-			return res.status(400).json({
-				success: false,
-				msg: 'Not a valid id.',
-				data: null,
-			});
+			return next(
+				new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+			);
 		}
 		res.status(200).json({
 			success: true,
@@ -41,17 +37,7 @@ exports.getBootcamp = async (req, res, next) => {
 			data: bootcamp,
 		});
 	} catch (err) {
-		if (err.name === 'CastError') {
-			return res.status(400).json({
-				success: false,
-				msg: 'Not a valid id.',
-				data: null,
-			});
-		}
-		res.status(400).json({
-			success: false,
-			msg: err.message,
-		});
+		next(err);
 	}
 };
 
@@ -67,10 +53,7 @@ exports.createBootcamp = async (req, res, next) => {
 			data: bootcamp,
 		});
 	} catch (err) {
-		res.status(400).json({
-			success: false,
-			msg: err.message,
-		});
+		next(err);
 	}
 };
 
@@ -85,11 +68,9 @@ exports.updateBootcamp = async (req, res, next) => {
 		});
 
 		if (!bootcamp) {
-			return res.status(400).json({
-				success: false,
-				msg: 'Not a valid id.',
-				data: null,
-			});
+			return next(
+				new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+			);
 		}
 		res.status(200).json({
 			success: true,
@@ -97,17 +78,7 @@ exports.updateBootcamp = async (req, res, next) => {
 			data: bootcamp,
 		});
 	} catch (err) {
-		if (err.name === 'CastError') {
-			return res.status(400).json({
-				success: false,
-				msg: 'Not a valid id.',
-				data: null,
-			});
-		}
-		res.status(400).json({
-			success: false,
-			msg: err.message,
-		});
+		next(err);
 	}
 };
 
@@ -119,11 +90,9 @@ exports.deleteBootcamp = async (req, res, next) => {
 		const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
 
 		if (!bootcamp) {
-			return res.status(400).json({
-				success: false,
-				msg: 'Not a valid id.',
-				data: null,
-			});
+			return next(
+				new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+			);
 		}
 		res.status(200).json({
 			success: true,
@@ -131,16 +100,6 @@ exports.deleteBootcamp = async (req, res, next) => {
 			data: {},
 		});
 	} catch (err) {
-		if (err.name === 'CastError') {
-			return res.status(400).json({
-				success: false,
-				msg: 'Not a valid id.',
-				data: null,
-			});
-		}
-		res.status(400).json({
-			success: false,
-			msg: err.message,
-		});
+		next(err);
 	}
 };
