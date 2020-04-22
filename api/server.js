@@ -26,6 +26,7 @@ app.use(express.json());
 
 // ROUTES
 app.use('/api/v1/bootcamps', require('./routes/bootcamps'));
+app.use('/api/v1/courses', require('./routes/courses'));
 
 app.use(errorHandler);
 
