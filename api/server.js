@@ -1,8 +1,11 @@
+const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
 // const logger = require('./middleware/logger');
 const morgan = require('morgan');
 const colors = require('colors');
+const fileUpload = require('express-fileupload');
+
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 
@@ -15,14 +18,20 @@ connectDB();
 const app = express();
 
 // Middlawares
-// app.use(logger); // Custom logger
-// @Dev Logging Middleware
+
+// Body parser
+app.use(express.json());
+
+// @Dev Logging Middleware // app.use(logger); // Custom logger
 if (process.env.NODE_ENV === 'development') {
 	app.use(morgan('dev'));
 }
-// @Prod Middlewares
-// Body parser
-app.use(express.json());
+
+// File Uploading
+app.use(fileUpload());
+
+// Set static folder for upload images etc.
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ROUTES
 app.use('/api/v1/bootcamps', require('./routes/bootcamps'));

@@ -1,6 +1,7 @@
 #CUSTOMS
 /source
 /config/config.env
+/public/uploads
 
 
 # Logs
