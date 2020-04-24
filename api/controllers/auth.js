@@ -1,5 +1,7 @@
+const crypto = require('crypto');
 const ErrorResponse = require('../utils/ErrorResponse');
 const asyncHandler = require('../middleware/async');
+const sendEmail = require('../utils/sendEmail');
 
 const User = require('../models/User');
 
@@ -57,6 +59,45 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 	});
 });
 
+// @desc      Update user details (self not admin privilages)
+// @route     PUT /api/v1/auth/me/update/info
+// @access    Private
+exports.updateMe = asyncHandler(async (req, res, next) => {
+	const fieldsToUpdate = {
+		name: req.body.name,
+		email: req.body.email,
+	};
+
+	const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+		new: true,
+		runValidators: true,
+	});
+
+	res.status(200).json({
+		success: true,
+		data: user,
+	});
+});
+
+// @desc      Update user password (self not admin privilages)
+// @route     PUT /api/v1/auth/me/update/password
+// @access    Private
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.user.id).select('+password');
+
+	// Check current password is correct
+	if (!(await user.matchPassword(req.body.currentPassword))) {
+		return next(new ErrorResponse('Password is incorrect.', 401));
+	}
+
+	// Set the new password
+	user.password = req.body.newPassword;
+	await user.save();
+
+	// Send back token // after change password logout all
+	sendTokenResponse(user, 200, res);
+});
+
 // @desc      Forgot password
 // @route     POST /api/v1/auth/forgotpassword
 // @access    Public
@@ -78,10 +119,74 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
 	await user.save({ validateBeforeSave: false });
 
-	res.status(200).json({
-		success: true,
-		data: user,
+	// Create reset url
+	const resetUrl = `${req.protocol}://${req.get(
+		'host'
+	)}/api/v1/auth/resetpassword/${resetToken}`;
+
+	const message = `You are receiving this email because you (or someone else) has requested the reset of a password. If was that you please make a PUT request to: \n\n ${resetUrl}`;
+
+	try {
+		await sendEmail({
+			email: user.email,
+			subject: 'Password Reset Confirmation',
+			message,
+		});
+		res.status(200).json({
+			success: true,
+			message: 'Email sent.',
+		});
+	} catch (err) {
+		console.log(err);
+
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpire = undefined;
+		await user.save({ validateBeforeSave: false });
+
+		return next(
+			new ErrorResponse('Email could not be sent. Please try again later.', 500)
+		);
+	}
+});
+
+// @desc      Reset password
+// @route     PUT /api/v1/auth/resetpassword/:resetToken
+// @access    Public
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+	// Get hashed password
+	const resetPasswordToken = crypto
+		.createHash('sha256')
+		.update(req.params.resetToken)
+		.digest('hex');
+
+	const user = await User.findOne({
+		resetPasswordToken,
+		resetPasswordExpire: { $gt: Date.now() },
 	});
+
+	if (!user) {
+		return next(new ErrorResponse('Token is invalid.', 400));
+	}
+
+	// Set New Password & Set token and expire undefined
+	user.password = req.body.password;
+	user.resetPasswordToken = undefined;
+	user.resetPasswordExpire = undefined;
+
+	await user.save();
+
+	try {
+		await sendEmail({
+			email: user.email,
+			subject: 'Password Reset Successfull',
+			message: 'Your password changed successfully.',
+		});
+	} catch (err) {
+		console.log(err);
+	}
+
+	// send token because logout from all after reset password
+	sendTokenResponse(user, 200, res);
 });
 
 // Get Token from model, create cookie and send response
