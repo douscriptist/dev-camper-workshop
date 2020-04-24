@@ -34,6 +34,22 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @route     POST /api/v1/bootcamps/:id
 // @access    Private
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
+	// Add user to req.body // req.user comes from middleware so we can use
+	req.body.user = req.user.id;
+
+	// Check for published bootcamps // Because Limit = 2 per/publisher
+	const publishedBootcamps = await Bootcamp.find({ user: req.user.id });
+	// If the user is not an admin, they can only add 2 bootcamps
+	// LATER: active bootcamps / after bootcamp dont delete? store as a passive/past
+	if (publishedBootcamps.length >= 2 && req.user.role !== 'admin') {
+		return next(
+			new ErrorResponse(
+				`The user with ID: ${req.user.id} already has 2 bootcamps active.`
+			),
+			400
+		);
+	}
+
 	const bootcamp = await Bootcamp.create(req.body);
 	res.status(201).json({
 		success: true,
