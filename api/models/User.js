@@ -21,11 +21,6 @@ const UserSchema = new mongoose.Schema({
 		enum: ['user', 'publisher'],
 		default: 'user',
 	},
-	test: {
-		type: String,
-		enum: ['a', 'b'],
-		default: 'a',
-	},
 	password: {
 		type: String,
 		required: [true, 'Password is required.'],
