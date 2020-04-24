@@ -42,7 +42,7 @@ const advancedResults = (model, populate) => async (req, res, next) => {
 	const limit = parseInt(req.query.limit, 10) || 20;
 	const startIndex = (page - 1) * limit;
 	const endIndex = page * limit;
-	const total = await model.countDocuments();
+	const total = await model.countDocuments(JSON.parse(queryStr));
 
 	query = query.skip(startIndex).limit(limit);
 
