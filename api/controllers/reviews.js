@@ -82,3 +82,82 @@ exports.addReview = asyncHandler(async (req, res, next) => {
 		data: review,
 	});
 });
+
+// @desc      Update a review
+// @route     PUT /api/v1/reviews/:id
+// @access    Private
+exports.updateReview = asyncHandler(async (req, res, next) => {
+	let review = await Review.findById(req.params.id);
+
+	// Check review is exists
+	if (!review) {
+		return next(
+			new ErrorResponse(`Review not found with id of ${req.params.id}`, 404)
+		);
+	}
+
+	// Make sure is the owner of review?
+	if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
+		return next(
+			new ErrorResponse(
+				`User ${req.user.id} is not authorized to update review ${req.params.id}.`,
+				401
+			)
+		);
+	}
+
+	// findByIdAndUpdate do not trigger hooks of mongoose so in the callback used doc.save()
+	review = await Review.findByIdAndUpdate(
+		req.params.id,
+		req.body,
+		{
+			new: true,
+			runValidators: true,
+		},
+		async (err, doc) => {
+			if (err) {
+				console.log(err);
+				return next(new ErrorResponse('Server Error', 500));
+			}
+			await doc.save();
+		}
+	);
+
+	res.status(200).json({
+		success: true,
+		msg: `Updated the review. ID: ${req.params.id}`,
+		data: review,
+	});
+});
+
+// @desc      Delete a review
+// @route     DELETE /api/v1/reviews/:id
+// @access    Private
+exports.deleteReview = asyncHandler(async (req, res, next) => {
+	let review = await Review.findById(req.params.id);
+
+	// Check review is exists
+	if (!review) {
+		return next(
+			new ErrorResponse(`Review not found with id of ${req.params.id}`, 404)
+		);
+	}
+
+	// Make sure is the owner of review?
+	if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
+		return next(
+			new ErrorResponse(
+				`User ${req.user.id} is not authorized to update review ${req.params.id}.`,
+				401
+			)
+		);
+	}
+
+	await review.remove();
+
+	res.status(200).json({
+		success: true,
+		msg: `Deleted the review. ID: ${req.params.id}`,
+		data: {},
+	});
+});

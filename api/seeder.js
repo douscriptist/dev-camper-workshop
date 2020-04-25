@@ -59,6 +59,7 @@ const deleteData = async () => {
 		await Course.deleteMany();
 		await User.deleteMany();
 		await Review.deleteMany();
+		await Review.collection.drop();
 
 		console.log('Data Destroyed...'.red.inverse);
 		process.exit();
