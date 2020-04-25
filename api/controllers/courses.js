@@ -114,10 +114,20 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
 		);
 	}
 
-	course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-		new: true,
-		runValidators: true,
-	});
+	course = await Course.findByIdAndUpdate(
+		req.params.id,
+		req.body,
+		{
+			new: true,
+			runValidators: true,
+		},
+		async (err, doc) => {
+			if (err) {
+				return next(new ErrorResponse('Server Error', 500));
+			}
+			await doc.save();
+		}
+	);
 
 	res.status(200).json({
 		success: true,

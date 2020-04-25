@@ -75,7 +75,7 @@ CourseSchema.post('save', async function () {
 });
 
 // Call getAverage Cost & Duration(weeks) after save
-CourseSchema.pre('remove', async function () {
+CourseSchema.post('remove', async function () {
 	this.constructor.getAverage(this.bootcamp);
 });
 
