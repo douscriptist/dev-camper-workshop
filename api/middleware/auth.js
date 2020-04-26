@@ -8,15 +8,17 @@ exports.protect = asyncHandler(async (req, res, next) => {
 	let token;
 
 	// Check the header
+	// Token in the header with Bearer
 	if (
 		req.headers.authorization &&
 		req.headers.authorization.startsWith('Bearer')
 	) {
 		token = req.headers.authorization.split(' ')[1];
 	}
-	// else if (req.cookies.token) {
-	// 	token = req.cookies.token;
-	// }
+	// Token with cookies
+	else if (req.cookies.token) {
+		token = req.cookies.token;
+	}
 
 	// Check token exists
 	if (!token) {
