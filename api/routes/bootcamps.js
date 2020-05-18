@@ -30,7 +30,13 @@ router
 	.delete(protect, authorize('publisher', 'admin'), deleteBootcamp);
 router
 	.route('/')
-	.get(advancedResults(Bootcamp, 'courses'), getBootcamps)
+	.get(
+		advancedResults(Bootcamp, {
+			path: 'courses',
+			select: 'title tuition weeks description',
+		}),
+		getBootcamps
+	)
 	.post(protect, authorize('publisher', 'admin'), createBootcamp);
 
 module.exports = router;

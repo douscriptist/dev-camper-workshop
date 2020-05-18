@@ -32,6 +32,9 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 exports.createUser = asyncHandler(async (req, res, next) => {
 	const user = await User.create(req.body);
 
+	//LATER:
+	// admin(super admin) can create admin/publisher/
+	// also add for approving availability for pending publisher/admin requests
 	res.status(201).json({
 		success: true,
 		data: user,
